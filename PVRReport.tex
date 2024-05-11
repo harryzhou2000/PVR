@@ -212,12 +212,14 @@ $[\mathcal{O}]$。问题是需要保证原始基函数的独立性，否则Gram-
 
 定义（$i$单元）cell-wise的内积：
 $$
-    \innerproduct{f_1}{f_2}_{\Omega_i}=\int_{\Omega_i}{f_1f_2d\Omega}
+    \innerproduct{f_1}{f_2}_{\Omega_i}=\frac{1}{\Omega_i}\int_{\Omega_i}{f_1f_2d\Omega}
 $$
 对于每个单元上某组零均值正交基函数$\psi_i^l$（此处下标为单元，上标为基维度），定义重构：
 $$
     u_i=\mean{u}_i + \sum_{l>0}{u_i^l\psi_i^l}
 $$
+这样，$\psi_i^0=1$恰为正交基的一部分，非常数部分与之正交且
+自身为单位大小。
 则可以定义基于正交投影（系数）的泛函：
 $$
     I_f=
@@ -225,11 +227,13 @@ $$
     % +
     \sum_{m}
     {
+        w_{b,f,m}
         \innerproduct{u_i-u_j}{\psi_i^m}_{\Omega_i}^2
     }
     +
     \sum_{m}
     {
+        w_{b,f,m}
         \innerproduct{u_i-u_j}{\psi_j^m}_{\Omega_j}^2
     }
 $$
@@ -239,16 +243,18 @@ $$
         I_f & =
         \sum_{m}
         {
+            w_{b,f,m}
             \innerproduct{\mean{u}_i + \sum_{l>0}{u_i^l\psi_i^l} - \mean{u}_j - \sum_{l>0}{u_j^l\psi_j^l} }{\psi_i^m}_{\Omega_i}^2
         }
         +
         \sum_{m}
         {
+            w_{b,f,m}
             \innerproduct{\mean{u}_i + \sum_{l>0}{u_i^l\psi_i^l} - \mean{u}_j - \sum_{l>0}{u_j^l\psi_j^l} }{\psi_j^m}_{\Omega_j}^2
         }          \\
             & =
         \sum_{m}
-        {\left(
+        {w_{b,f,m}\left(
             \innerproduct{\mean{u}_i - \mean{u}_j}{\psi_i^m}_{\Omega_i}
             +
             \innerproduct{\sum_{l>0}{u_i^l\psi_i^l} - \sum_{l>0}{u_j^l\psi_j^l} }{\psi_i^m}_{\Omega_i}
@@ -256,15 +262,15 @@ $$
         \\
             & +
         \sum_{m}
-        {\left(
+        {w_{b,f,m}\left(
             \innerproduct{\mean{u}_i - \mean{u}_j}{\psi_j^m}_{\Omega_j}
             +
             \innerproduct{\sum_{l>0}{u_i^l\psi_i^l} - \sum_{l>0}{u_j^l\psi_j^l} }{\psi_j^m}_{\Omega_j}
         \right)^2} \\
             & =
         \sum_{m}
-        {\left(
-            (\mean{u}_i - \mean{u}_j)\sqrt{\Omega_i}\delta_{m0}
+        {w_{b,f,m}\left(
+            (\mean{u}_i - \mean{u}_j)\delta_{m0}
             +
             u_i^m(1-\delta_{m0})
             - \sum_{l>0}u_j^l\innerproduct{\psi_j^l}{\psi_i^m}_{\Omega_i}
@@ -272,31 +278,31 @@ $$
         \\
             & +
         \sum_{m}
-        {\left(
-            (\mean{u}_j - \mean{u}_i)\sqrt{\Omega_j}\delta_{m0}
+        {w_{b,f,m}\left(
+            (\mean{u}_j - \mean{u}_i)\delta_{m0}
             +
             u_j^m(1-\delta_{m0})
             - \sum_{l>0}u_i^l\innerproduct{\psi_i^l}{\psi_j^m}_{\Omega_j}
         \right)^2} \\
             & =
         \left[
-            (\mean{u}_i - \mean{u}_j)\sqrt{\Omega_i}
-            - \sum_{l>0}u_j^l\innerproduct{\psi_j^l}{\psi_i^0}_{\Omega_i}
+            (\mean{u}_i - \mean{u}_j)
+            - \sum_{l>0}u_j^l\innerproduct{\psi_j^l}{1}_{\Omega_i}
             \right]^2
         +
         \left[
-            (\mean{u}_j - \mean{u}_i)\sqrt{\Omega_j}
-            - \sum_{l>0}u_i^l\innerproduct{\psi_i^l}{\psi_j^0}_{\Omega_j}
+            (\mean{u}_j - \mean{u}_i)
+            - \sum_{l>0}u_i^l\innerproduct{\psi_i^l}{1}_{\Omega_j}
         \right]^2  \\
             & +
         \sum_{m>0}
-        {\left(
+        {w_{b,f,m}\left(
             u_i^m
             - \sum_{l>0}u_j^l\innerproduct{\psi_j^l}{\psi_i^m}_{\Omega_i}
             \right)^2}
         +
         \sum_{m>0}
-        {\left(
+        {w_{b,f,m}\left(
             u_j^m
             - \sum_{l>0}u_i^l\innerproduct{\psi_i^l}{\psi_j^m}_{\Omega_j}
         \right)^2} \\
@@ -308,37 +314,87 @@ $$
         \frac{1}{2}\pd{I_f}{u_i^k}
          & =
         \left[
-            (\mean{u}_j - \mean{u}_i)\sqrt{\Omega_j}
-            - \sum_{l>0}u_i^l\innerproduct{\psi_i^l}{\psi_j^0}_{\Omega_j}
+            (\mean{u}_j - \mean{u}_i)
+            - \sum_{l>0}u_i^l\innerproduct{\psi_i^l}{1}_{\Omega_j}
             \right]\left[
-            - \innerproduct{\psi_i^k}{\psi_j^0}_{\Omega_j}
+            - \innerproduct{\psi_i^k}{1}_{\Omega_j}
             \right]
         \\
          & +
-        u_i^k
-        - \sum_{l>0}u_j^l\innerproduct{\psi_j^l}{\psi_i^k}_{\Omega_i}
+         w_{b,f,k} u_i^k
+        - w_{b,f,k}\sum_{l>0}u_j^l\innerproduct{\psi_j^l}{\psi_i^k}_{\Omega_i}
         +
         \sum_{m>0}
-        \left[
+        w_{b,f,m}\left[
             {\left(
                     u_j^m
                     - \sum_{l>0}u_i^l\innerproduct{\psi_i^l}{\psi_j^m}_{\Omega_j}
                     \right)\left(
                     - \innerproduct{\psi_i^k}{\psi_j^m}_{\Omega_j}
                     \right)}
-        \right]                                           \\
+        \right]                                                                                                 \\
          & =
-        u_i^k +
-        \sum_{m>0}\sum_{l>0}
+         w_{b,f,k}u_i^k +
+        \sum_{m>0}\sum_{l>0}w_{b,f,m}
         \innerproduct{\psi_i^k}{\psi_j^m}_{\Omega_j}
         \innerproduct{\psi_i^l}{\psi_j^m}_{\Omega_j}u_i^l +
-        \sum_{l>0}\innerproduct{\psi_i^k}{\psi_j^0}_{\Omega_j}\innerproduct{\psi_i^l}{\psi_j^0}_{\Omega_j}u_i^l  \\
+        \sum_{l>0}\innerproduct{\psi_i^k}{1}_{\Omega_j}\innerproduct{\psi_i^l}{1}_{\Omega_j}u_i^l \\
          &
-        - \sum_{m>0}\innerproduct{\psi_i^k}{\psi_j^m}_{\Omega_j}u_j^m
-        - \sum_{l>0}\innerproduct{\psi_j^l}{\psi_i^k}_{\Omega_i}u_j^l
-        + (\mean{u}_i - \mean{u}_j)\sqrt{\Omega_j}\innerproduct{\psi_i^k}{\psi_j^0}_{\Omega_j}
+        - \sum_{m>0}w_{b,f,m}\innerproduct{\psi_i^k}{\psi_j^m}_{\Omega_j}u_j^m
+        - \sum_{l>0}w_{b,f,k}\innerproduct{\psi_j^l}{\psi_i^k}_{\Omega_i}u_j^l
+        + (\mean{u}_i - \mean{u}_j)\innerproduct{\psi_i^k}{1}_{\Omega_j}
+        , k>0
     \end{aligned}
 $$
+组装向量$k>0$，$\uu_i=[u_i^k]$，则上式为
+$$
+\frac{1}{2}\pd{I_f}{\uu_i} = A_{f,i} \uu_i - B_{ij} \uu_j - 
+b_{ij}(\mean{u}_j - \mean{u}_i ) 
+$$
+其中系数矩阵与向量为：
+$$
+[A_{f,i}]_{kl} = w_{b,f,k} \delta_{kl} +
+\sum_{m>0}  
+w_{b,f,m}
+\innerproduct{\psi_i^k}{\psi_j^m}_{\Omega_j}
+\innerproduct{\psi_i^l}{\psi_j^m}_{\Omega_j}
++
+\innerproduct{\psi_i^k}{1}_{\Omega_j}
+\innerproduct{\psi_i^l}{1}_{\Omega_j}
+$$
+$$
+[B_{ij}]_{kl} = 
+w_{b,f,l}\innerproduct{\psi_i^k}{\psi_j^l}_{\Omega_j}
++
+w_{b,f,k}\innerproduct{\psi_j^l}{\psi_i^k}_{\Omega_i}
+$$
+$$
+[b_{ij}]_{k} = 
+\innerproduct{\psi_i^k}{1}_{\Omega_j}
+$$
+记
+$$
+[\mathcal{B}_{i,j}]_{km}=\innerproduct{\psi_i^k}{\psi_j^m}_{\Omega_j}
+$$
+则矩阵表示下：
+$$
+[A_{f,i}] = I W_{b,f} +
+[\mathcal{B}_{i,j}] W_{b,f} [\mathcal{B}_{i,j}]\trans
++
+[b_{ij}][b_{ij}]\trans
+$$
+$$
+[B_{ij}] = 
+[\mathcal{B}_{i,j}]W_{b,f}
++
+W_{b,f}[\mathcal{B}_{i,j}]\trans
+$$
+其中$W_{b,f}=\text{diag}(w_{b,f,1},w_{b,f,2},...w_{b,f,N_{base}-1})$
+为（试验）基权重。
+
+因此，如果已经获知每个单元的正交基函数，同时可进行临单元延拓并求内积，
+即可计算$[\mathcal{B}_{i,j}]$以及$[b_{ij}]$，进一步获得重构系数。
+
 
 
 
